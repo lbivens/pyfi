@@ -238,6 +238,29 @@ def backup_get(args):
         e = args.map_fn(e)
     print(json.dumps(e, sort_keys=True, indent=2, separators=(',', ': ')))
 
+def backup_verify(args):
+    e = args.endpoint.verify_backup(args.vmuuid, args.snapuuid)
+    if not e:
+        print('error!')
+        exit(1)
+    ok = True
+    fmt = "%-60s %s"
+    print fmt % ("File", "State")
+    print fmt % (("-" * 60), ('-' * 10))
+    for f, hashes in e.iteritems():
+        f = f.replace(args.vmuuid, '<vm>')
+        if hashes['expected'] == hashes['calculated']:
+            print fmt % (f, "OK")
+        else:
+            print fmt % (f, "ERROR")
+    print
+    if ok:
+        print "Backup OK"
+        exit(0)
+    else:
+        print "Backup corrupted!"
+        exit(1)
+
 def backup_delete(args):
     e = args.endpoint.delete_backup(args.vmuuid, args.snapuuid, args.l)
     if not e:
@@ -337,6 +360,9 @@ class VM(Entity):
         else:
             return r
 
+    def verify_backup(self, uuid, snapid):
+        return self._get_attr(uuid, 'backups/' + snapid)
+
     def delete_backup(self, uuid, snapid, local):
         if local:
             return self._delete_attr_body(uuid, 'backups/' + snapid, {'location':'hypervisor'})
@@ -375,6 +401,8 @@ class VM(Entity):
                                      help='Supress the header.')
         parser_vms_list.add_argument('-p', action='store_true',
                                      help='show in parsable format, rows sepperated by colon.')
+        parser_vms_list.add_argument('--raw', '-r', action='store_true',
+                                    help='print json array of complete data')
         parser_vms_list.set_defaults(func=show_list,
                                      fmt_def=vm_fmt)
         parser_vms_get = subparsers_vms.add_parser('get', help='gets a VM')
@@ -504,10 +532,18 @@ class VM(Entity):
                                          help='show in parsable format, rows sepperated by colon.')
         parser_backups_list.set_defaults(func=backups_list,
                                          fmt_def=backup_fmt)
+
         parser_backups_get = subparsers_backups.add_parser('get', help='gets backups')
         parser_backups_get.add_argument('snapuuid',
                                         help='UUID if the backup')
         parser_backups_get.set_defaults(func=backup_get)
+
+        parser_backups_verify = subparsers_backups.add_parser('verify', help='verifies a backup')
+        parser_backups_verify.add_argument('snapuuid',
+                                        help='UUID if the backup')
+        parser_backups_verify.set_defaults(func=backup_verify)
+
+
         parser_backups_delete = subparsers_backups.add_parser('delete', help='deletes backups')
         parser_backups_delete.add_argument('snapuuid',
                                            help='UUID if the backup')

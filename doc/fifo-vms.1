@@ -1,4 +1,4 @@
-.TH fifo-vms 1  "Jan 1, 2014" "version 0.2.3" "USER COMMANDS"
+.TH fifo-vms 1  "Jan 1, 2014" "version 0.2.8" "USER COMMANDS"
 .SH NAME
 fifo-vms \- VM related commnads for the FiFo API
 .SH SYNOPSIS
@@ -15,12 +15,14 @@ displays a inline help.
 
 .SH COMMANDS
 .TP
-vms list [\-p] [\-H] [\-\-fmt FMT]
-This command lists the users currently available on the server.
+vms list [\-\-raw|\-r] [\-p] [\-H] [\-\-fmt FMT]
+This command lists the vms currently available on the server.
 
 Valid choices for
 .B FMT
 are: uuid, alias, ip, state and hypervisor.
+
+If the \-\-raw flag is used, an array of vm json objects is displayed.
 .TP
 vms get [\-\-raw|\-r] <uuid|alias>
 This command returns the JSON representation of a vm's configuration
@@ -144,6 +146,11 @@ are: uuid, timestamp, parent, state, local, size and comment.
 vms backups <vm uuid> get <uuid|name>
 This command returns the JSON representation of a backup configuration
 as stored in teh FiFo server.
+.TP
+vms backups <vm uuid> verify <uuid|name>
+Checks the sha1 checksums on each file and re-computes them to verify
+the integrety of a backup. This command can take sime time since it requires
+reading the entire backup.
 .TP
 vms backup <vm uuid|alias> create [\-d] [\-\-parent parent] [\-x] "<comment>"
 Creates a new backup of the <vm uuid>, it is advised to power down

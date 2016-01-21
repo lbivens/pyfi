@@ -1,4 +1,4 @@
-.TH fifo-users 1  "Jan 1, 2014" "version 0.2.3" "USER COMMANDS"
+.TH fifo-users 1  "Jan 1, 2014" "version 0.2.8" "USER COMMANDS"
 .SH NAME
 fifo-users \- User related commnads for the FiFo API
 .SH SYNOPSIS
@@ -15,12 +15,14 @@ displays a inline help.
 
 .SH COMMANDS
 .TP
-users list [\-p] [\-H] [\-\-fmt FMT]
+users list [\-\-raw|\-r] [\-p] [\-H] [\-\-fmt FMT]
 This command lists the users currently available on the server.
 
 Valid choices for
 .B FMT
 are: uuid, name, roles.
+
+If the \-\-raw flag is used, an array of user json objects is displayed.
 .TP
 users get <uuid|name>
 This command returns the JSON representation of a user object stored
@@ -35,6 +37,15 @@ the data base.
 .TP
 users create [\-p] [\-\-password|\-P PASS] [\-\-role|\-g ROLE] [\-\-organization|\-o ORG] NAME
 Creates a new user and optionally sets the password, role and orgnaistation. If \-p is passed only the UUID is returned.
+.TP
+users sign USER [\-\-csr CSR] [\-\-comment COMMENT]
+Signs a csr and returns the certificate, printed to STDOUT.
+
+.B CSR
+if privided the csr fill be read from this file, otherwise from STDIN.
+
+.B COMMENT
+an optional comment provided to identify the certificate, otherwise a default name will be used.
 .TP
 users grant USER PERM...
 Grants a user a permission where.
